@@ -48,12 +48,15 @@
 //                                        CONSTANTS
 // ----------------------------------------------------------------------------------
 
-#define EEPROM_SIZE 20      // size of EEPROM to save persistent variables
+#define EEPROM_SIZE 32      // size of EEPROM to save persistent variables
 #define ADR_NM_START_H 0
 #define ADR_NM_END_H 4
 #define ADR_NM_START_M 8
 #define ADR_NM_END_M 12
 #define ADR_BRIGHTNESS 16
+#define ADR_COLOR_R 20
+#define ADR_COLOR_G 24
+#define ADR_COLOR_B 28
 
 
 #define NEOPIXELPIN 5       // pin to which the NeoPixels are attached
@@ -360,6 +363,9 @@ void setup() {
   logger.logString("NTP running");
   logger.logString("Time: " +  ntp.getFormattedTime());
   logger.logString("TimeOffset (seconds): " + String(ntp.getTimeOffset()));
+
+  // read maincolor clock from EEPROM
+  maincolor_clock = getMainColorClock();
 
   // show the current time for short time in words
   int hours = ntp.getHours24();
@@ -851,6 +857,10 @@ void handleCommand() {
       mypong.initGame(1);
     }
   }
+  else if(server.argName(0) == "savecolor"){
+    logger.logString("Save current mainclock color to EEPROM");
+    setMainColorClock();
+  }
   server.send(204, "text/plain", "No Content"); // this page doesn't send back content --> 204
 }
 
@@ -912,6 +922,38 @@ void handleDataRequest() {
     message += "}";
     server.send(200, "application/json", message);
   }
+}
+
+uint32_t getMainColorClock() {
+  int r = readIntEEPROM(ADR_COLOR_R);
+  int g = readIntEEPROM(ADR_COLOR_G);
+  int b = readIntEEPROM(ADR_COLOR_B);
+  if( !(r == 0 && g == 0 && b == 0) ){
+    Serial.print(F("get maincolor clock from EEPROM(r-g-b): "));
+    Serial.print(r);
+    Serial.print(F("-"));
+    Serial.print(g);
+    Serial.print(F("-"));
+    Serial.println(b);
+  }
+  return LEDMatrix::Color24bit(r, g, b);;
+}
+
+void setMainColorClock() {
+  int r = (maincolor_clock >> 16) & 0xFF;
+  int g = (maincolor_clock >> 8) & 0xFF;
+  int b = (maincolor_clock) & 0xFF;
+
+  Serial.print(F("set maincolor clock to EEPROM (r-g-b): "));
+  Serial.print(r);
+  Serial.print(F("-"));
+  Serial.print(g);
+  Serial.print(F("-"));
+  Serial.println(b);
+
+  writeIntEEPROM(ADR_COLOR_R, r);
+  writeIntEEPROM(ADR_COLOR_G, g);
+  writeIntEEPROM(ADR_COLOR_B, b);
 }
 
 /**

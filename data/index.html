@@ -260,7 +260,14 @@
 		margin: 5px; 
 		background-color: rgba(147, 147, 158, 0.4);
 	}
-  
+
+	.savecolor-button{
+		height: 30px; 
+		width:140px;
+		margin: 5px; 
+		background-color: rgba(147, 147, 158, 0.4);
+	}
+
 	</style>
 	<title>WORDCLOCK 2.0</title>
 	<link rel="icon" type="image/svg" href="./icons/clock.svg">
@@ -335,6 +342,9 @@
 					<div class="grid-item"><span class="dot"><a onclick="sendCommand('./cmd?led=200-200-0')" class="buttonClass" style="background:rgb(200,200,0);"></a></span></div>
 					<div class="grid-item"><span class="dot"><a onclick="sendCommand('./cmd?led=255-128-0')" class="buttonClass" style="background:rgb(255,128,0);"></a></span></div>
 				</div>
+			</div>
+			<div class="control-container">
+				<div class="buttonClass savecolor-button" onclick="saveColor()">SAVE COLOR</div>
 			</div>
 		</div>
 
@@ -558,7 +568,13 @@
 					container.classList.add("show");
 				}
 			}
-			
+
+			function saveColor(){
+				var cmdstr = "./cmd?savecolor";
+				console.log(cmdstr);
+				sendCommand(cmdstr);
+			}
+
 		</script>
 	</body>
 
